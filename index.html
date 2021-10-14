@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+
+<html lang="zh-tw">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Sort Visualization</title>
+
+    <script src="./jquery-3.6.0.min.js"></script>
+    <script src="./p5.min.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+        }
+        canvas {
+            vertical-align: top;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function range(start, end) {
+            return Array(end - start + 1).fill().map((_, idx) => start + idx)
+        }
+        function shuffle(array) {
+          var tmp, current, top = array.length;
+          if(top) while(--top) {
+            current = Math.floor(Math.random() * (top + 1));
+            tmp = array[current];
+            array[current] = array[top];
+            array[top] = tmp;
+          }
+          return array;
+        }
+
+        function newSort(array) {
+            var top = array.length;
+            for(var i=0;i<top;i++) {
+                for(var j=0;j<top;j++) {
+                    if(array[i]<array[j]) {
+                        swap(array, i, j);
+                    }
+                }
+            }
+            return array;
+        }
+
+        function swap(arr, i, j) {
+            var tmp;
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+
+        function verify(arr) {
+            var top = arr.length;
+            for(var i = 0; i < top-1; i++) {
+                if(arr[i] > arr[i+1]) {
+                    console.log("error");
+                    return;
+                }
+            }
+            console.log("correct");
+        }
+
+        var result = shuffle(range(1, 1000)); // [1 ... 1000]
+        console.log(result);
+        verify(result);
+        newSort(result);
+        console.log(result);
+        verify(result);
+
+    </script>
+
+</head>
+
+<body>
+    <script type="text/javascript">
+        // Set Global Variables
+        let values = [];
+        let w = 20;
+        // To store the state of each bar
+        // in order to change the color
+        let states = [];
+        let NORMAL_STATE = -1;
+        let ON_GOING_STATE = 0;
+        let COMPARING_STATE = 1;
+
+        function setup() {
+            // Create Canvas of Size Windows
+            // Width * Windows Height
+            createCanvas(800, 400);
+            // Insert Random values in array
+            values = new Array(floor(width/w));
+            for(let i = 0; i < values.length; i++) {
+                values[i] = float(random(height));
+                states[i] = NORMAL_STATE;
+            }
+            // Print Unsorted Array
+            print("Unsorted Array:" + values);
+            // Call to bubble sort function
+            newSort(values, 0, values.length);
+            // Print Sorted Array
+            print("Sorted Array:" + values);
+        }
+
+        // Definition of bubble sort
+        async function bubbleSort(arr, start, end) {
+            if(start >= end) {
+                return;
+            }
+            for(var i = 0; i < end-1; i++) {
+                for(var j = 0; j < end-i-1; j++) {
+                    if(arr[j] >= arr[j+1]) {
+                        states[j] = 1;
+                        // Call to swap function
+                        await swap(arr, j, j+1);
+                        states[j+1] = 0;
+                    }
+                    states[j] = 2;
+                }
+            }
+            return arr;
+        }
+
+        // Definition of bubble sort
+        async function newSort(arr, start, end) {
+            for(var i = 0; i <= end-1; i++) {
+                states[i] = 0;
+                for(var j = 0; j <= end-1; j++) {
+                    if(i!=j) {
+                        states[j] = 1;
+                    }
+                    await sleep(20);
+                    if(arr[i] < arr[j]) {
+                        // Call to swap function
+                        await swap(arr, i, j);
+                    }
+                    if(i!=j) {
+                        states[j] = 2;
+                    }
+                }
+                states[i] = 2;
+            }
+            return arr;
+        }
+
+        // // Definition of bubble sort
+        // async function newFasterSort(arr, start, end) {
+        //     for(var i = 0; i <= end-1; i++) {
+        //         states[i] = 0;
+        //         for(var j = 0; (i==0&&j<=end-1 )||(j <= i); j++) {
+        //             if(i!=j) {
+        //                 states[j] = 1;
+        //             }
+        //             await sleep(200);
+        //             if(arr[i] < arr[j]) {
+        //                 // Call to swap function
+        //                 await swap(arr, i, j);
+        //             }
+        //             if(i!=j) {
+        //                 states[j] = 2;
+        //             }
+        //         }
+        //         states[i] = 2;
+        //     }
+        //     return arr;
+        // }
+
+        // Definition of draw function
+        function draw() {
+            background(51);
+            for(let i = 0; i < values.length; i++) {
+                stroke(0);
+                fill(255);
+                if(states[i] == 0) {
+                    fill(255, 0, 0);
+                }
+                else if (states[i] == 1) {
+                    // Element currently sorting
+                    fill("#58FA82");
+                }
+                else {
+                    fill(255);
+                }
+                rect(i*w, height - values[i], w, values[i]);
+            }
+        }
+
+        // Definition of swap function
+        async function swap(arr, a, b) {
+            await sleep(100);
+            let t = arr[a];
+            arr[a] = arr[b];
+            arr[b] = t;
+        }
+
+        // Definition of sleep function
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+    </script>
+
+
+</body>
+
+</html>
